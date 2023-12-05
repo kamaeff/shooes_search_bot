@@ -33,7 +33,7 @@ check = basket_shop(inp, gender)
 
 if check:
   links.append(check)
-  print(f'ok\nLink:{links}')
+  print(f'ok\nLinksss:{links}')
 elif check == False:
   print('error')
   
