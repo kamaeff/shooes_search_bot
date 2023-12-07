@@ -1,47 +1,25 @@
-import requests
-from bs4 import BeautifulSoup
-from time import sleep
+import xlsxwriter
+from _xlswrite import array
 
 
-def download(url):
-    resp = requests.get(url, stream=True)
-    # создаем файл в котором запишем байты изооброжения
-    r = open("C:\\Users\\User\\Desktop\\img\\" + url.split("/")[-1], "wb")
-    for value in resp.iter_content(1024 * 1024):
-        r.write(value)
-    r.close()
+def writer(param):
+    print(param)
+    book = xlsxwriter.Workbook("./src/backend/gen_imgs/topbasket.xlsx")
+    page = book.add_worksheet("товар")
+    row = 0
+    column = 0
+    page.set_column("A:A", 20)
+    page.set_column("B:B", 20)
+    page.set_column("C:C", 50)
+    page.set_column("D:D", 50)
+
+    for item in param():
+        page.write(row, column, item[0])
+        page.write(row, column+1, item[1])
+        page.write(row, column+2, item[2])
+        row += 1
+    book.close()
 
 
-def get_url():
-    for count in range(1, 2):
-        url = "https://www.basketshop.ru/catalog/shoes/"
+writer(array)    
 
-        response = requests.get(url)
-
-        soup = BeautifulSoup(response.text, "lxml")
-
-        data = soup.find_all("div", class_="product-card")
-
-        for i in data:
-            card_url = "https://www.basketshop.ru" + i.find("a").get("href")
-            yield card_url
-
-
-def array():
-    for card_url in get_url():
-        response = requests.get(card_url)
-        sleep(2)
-        soup = BeautifulSoup(response.text, "lxml")
-        # переход в карточки обуви
-        all_cards = soup.find("div", class_="product__col product__col--2")
-        # карточка продукта
-        main_head = all_cards.find("div", class_="product__head")
-        # Нахождение названия кроссовок
-        name = main_head.find("h1", class_="product__title").text
-        # Нахождение цены
-        price = all_cards.find("div", class_="product__price-value").text
-        # Ссылки картинок
-        img_part = soup.find("div", class_="product__gallery-slider-slide-cell js-zoom")
-        url_img = img_part.find("img").get("src")
-        download(url_img)
-        yield name, price, url_img
