@@ -48,7 +48,6 @@
 
 import requests
 from bs4 import BeautifulSoup
-from time import sleep
 
 list_card_url = []
 item_info = []
@@ -56,7 +55,6 @@ url = f"https://www.basketshop.ru/catalog/shoes/"
 
 def basket_shop(brand, gender):
   for count in range(1, 2):
-      sleep(2)
       # todo: add gender option
       new_url =f"{brand}/{gender}/lifestyle;oncourt/"
       print(f"url: {url}\nnew_url: {url + new_url}")

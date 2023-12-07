@@ -1,6 +1,5 @@
 import logging
 import asyncio
-import time
 import telegram.ext.filters as filters
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -24,7 +23,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message_id = update.effective_message.id
     username = update.effective_user.first_name
     
-    await context.bot.delete_message(chat_id, message_id - 1)
     await context.bot.delete_message(chat_id, message_id)
     await context.bot.send_message(chat_id, text=f"Привет <i><b>{username}</b></i>, я помогу тебе найти кроссовки по твоему запросу. Давай для начала выберем твой пол", parse_mode="HTML",
                                    reply_markup=InlineKeyboardMarkup([
