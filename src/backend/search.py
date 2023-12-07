@@ -66,7 +66,8 @@ def basket_shop(brand, gender):
         for i in data:
             card_url = "https://www.basketshop.ru" + i.find("a").get("href")
             list_card_url.append(card_url)
-            
+        
+        print(url)
         return list_card_url
             
       else:
