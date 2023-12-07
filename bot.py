@@ -41,9 +41,7 @@ async def text_message_handler(update: Update, context: ContextTypes.DEFAULT_TYP
 def main() -> None:
     # connection_check()
     application = Application.builder().token(TOKEN).build()
-
     application.add_handler(CommandHandler("start", start))
-
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
