@@ -26,29 +26,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         message_id = update.callback_query.message.message_id
     
     await context.bot.delete_message(chat_id, message_id)
-    await context.bot.send_message(chat_id, text="HI")
+    await context.bot.send_message(chat_id, text=f"HI {username}")
         
-
-# async def main_menu_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-#     query = update.callback_query
-#     await query.answer()
-#     print(context.user_data)
-
-#     if query.data == "profile":
-#         profile_manager = ProfileManager(query)
-#         await profile_manager.edit_profile_caption()
-
-#     elif query.data == "exit":
-#         await update_main_menu(update, context)
-        
-#     elif query.data == "locale":
-#         await context.bot.send_message(
-#             chat_id=query.message.chat_id,
-#             text="Введите новый адрес:",
-#         )
-#         # Set the conversation state to handle the user's response
-#         context.user_data["waiting_for_locale"] = True
-
 
 async def text_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Get the user's message
@@ -64,9 +43,6 @@ def main() -> None:
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
-    # application.add_handler(CallbackQueryHandler(main_menu_button))
-    # text_handler = MessageHandler(Filters.text & ~Filters.command, text_message_handler)
-    # application.add_handler(text_handler)
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
