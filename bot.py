@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import time
 import telegram.ext.filters as filters
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -7,6 +8,7 @@ from telegram.ext import Application, CallbackQueryHandler, CommandHandler, Cont
 
 from src.backend.config import TOKEN
 from src.backend.DB import connection
+from src.backend._search import parsing
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -55,11 +57,22 @@ async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await context.bot.delete_message(chat_id, message_id - 1)
     await context.bot.delete_message(chat_id, message_id)
-    await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты ищешь кроссовки с запросом: {user_input}", parse_mode="HTML")
-    
+
     user_list = user_input.lower().split(' ')
-    user_list.append(selected_gender)
     print(user_list)
+    
+    res, url = parsing(user_list, selected_gender)
+    
+    if res == False:
+        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, Не удалось найти кроссовки по вашему запросу: {url}", parse_mode="HTML")
+    else:
+      parsed_info = ""
+      for item in res:
+          parsed_info += f"Кроссовки : {item[0][0]}\n"
+          parsed_info += f"Цена: {item[1][0]}\n"
+          parsed_info += "-" * 40 + "\n"
+          
+      await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, Результаты запроса:\n\n{parsed_info}\nСсылка: {url}", parse_mode="HTML")
   
     context.user_data.clear()
 
