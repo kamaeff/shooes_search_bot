@@ -1,10 +1,11 @@
 import xlsxwriter
 from _xlswrite import array
-
+import os
 
 def writer(param):
     print(param)
-    book = xlsxwriter.Workbook("./src/backend/gen_imgs/topbasket.xlsx")
+    folder = os.path.join("./src", "backend", "gen_imgs", "topbasket.xlsx")
+    book = xlsxwriter.Workbook(folder)
     page = book.add_worksheet("товар")
     row = 0
     column = 0

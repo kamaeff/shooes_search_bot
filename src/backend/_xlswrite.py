@@ -1,12 +1,14 @@
 import requests
 from bs4 import BeautifulSoup
 from time import sleep
+import os
 
 
 def download(url):
     resp = requests.get(url, stream=True)
     # создаем файл в котором запишем байты изооброжения
-    r = open("./src/backend/gen_imgs/topbasket.xlsx" + url.split("/")[-1], "wb")
+    folder = os.path.join("./src", "backend", "gen_imgs", "topbasket.xlsx")
+    r = open(folder + url.split("/")[-1], "wb")
     for value in resp.iter_content(1024 * 1024):
         r.write(value)
     r.close()
@@ -44,4 +46,5 @@ def array():
         img_part = soup.find("div", class_="product__gallery-slider-slide-cell js-zoom")
         url_img = img_part.find("img").get("src")
         download(url_img)
+        
         yield name, price, url_img
