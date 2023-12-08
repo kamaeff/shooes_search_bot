@@ -50,7 +50,6 @@ import requests
 from bs4 import BeautifulSoup
 
 list_card_url = []
-item_info = []
 url = f"https://www.basketshop.ru/catalog/shoes/"
 
 def basket_shop(brand, gender):
@@ -76,6 +75,7 @@ def basket_shop(brand, gender):
 
 
 def parsing(info, gender):
+  item_info = []
   inp = info[0]
   if gender == 'male':
     gender ='men'
@@ -100,8 +100,6 @@ def parsing(info, gender):
         price = price.replace('\n', '')
             
         item_info.append([[name], [price]])
-        
-        print(item_info)
 
     return item_info, url+f"{inp}/{gender}/lifestyle;oncourt/"
     
