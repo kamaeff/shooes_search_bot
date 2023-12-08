@@ -1,2 +1,3 @@
 /src/backend/config.py
+/src/backend/gen_imgs/
 *__pycache__
