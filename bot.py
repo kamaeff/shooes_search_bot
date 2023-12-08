@@ -90,10 +90,10 @@ async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             [InlineKeyboardButton(text="Назад", callback_data="back")],
         ]
       ))
+      parsed_info = ""
   
     context.user_data.clear()
       
-
 
 def main() -> None:
     loop = asyncio.get_event_loop()
