@@ -75,7 +75,6 @@ def basket_shop(brand, gender):
 
 
 def parsing(info, gender):
-  item_info = []
   inp = info[0]
   if gender == 'male':
     gender ='men'
@@ -86,6 +85,7 @@ def parsing(info, gender):
   if check == False:
     return False, inp
   else:
+    item_info = []
     for card_url in check:
         response = requests.get(card_url)
 
