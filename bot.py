@@ -30,20 +30,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                                        [InlineKeyboardButton(text="Женский", callback_data="female")],
                                    ]))
 
+async def back(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+  chat_id = update.effective_chat.id
+  message_id = update.effective_message.id
+  username = update.effective_user.first_name
+  text_data = update.callback_query.data
+  
+  if text_data == "back":
+      await context.bot.delete_message(chat_id, message_id)
+      await context.bot.send_message(chat_id, text=f"Привет <i><b>{username}</b></i>, я помогу тебе найти кроссовки по твоему запросу. Давай для начала выберем твой пол", parse_mode="HTML",
+                                    reply_markup=InlineKeyboardMarkup([
+                                        [InlineKeyboardButton(text="Мужской", callback_data="male")],
+                                        [InlineKeyboardButton(text="Женский", callback_data="female")],
+                                    ]))
+
 async def gender_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_chat.id
     message_id = update.effective_message.id
     username = update.effective_user.first_name
     
     await context.bot.delete_message(chat_id, message_id)
-    selected_gender = update.callback_query.data
+    text_data = update.callback_query.data
     
-    context.user_data['selected_gender'] = selected_gender
-    
-    if selected_gender == "male":
+    if text_data== "male":
+        context.user_data['selected_gender'] = text_data
         await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты выбрали мужской пол.\n\nТеперь давай определимся какую именно пару мы будем с тобой искать\nP.S вот тебе пример (<i>Puma RS-Z 8.5 us</i>)", parse_mode="HTML")
-    elif selected_gender == "female":
+    elif text_data == "female":
+        context.user_data['selected_gender'] = text_data
         await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты выбрали женский пол\n\nТеперь давай определимся какую именно пару мы будем с тобой искать\nP.S вот тебе пример (<i>Puma RS-Z 8.5 us</i>)", parse_mode="HTML")
+    
 
 async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = update.effective_chat.id
@@ -70,9 +85,14 @@ async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
           parsed_info += f"Цена: {item[1][0]}\n"
           parsed_info += "-" * 40 + "\n"
           
-      await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, Результаты запроса:\n\n{parsed_info}\nСсылка: {url}", parse_mode="HTML")
+      await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, Результаты запроса:\n\n{parsed_info}\nСсылка: {url}", parse_mode="HTML", reply_markup=InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(text="Назад", callback_data="back")],
+        ]
+      ))
   
     context.user_data.clear()
+      
 
 
 def main() -> None:
@@ -80,6 +100,7 @@ def main() -> None:
     connection_pool = loop.run_until_complete(connection.create_connection())
     application = Application.builder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(back, pattern="^(back)$"))
     application.add_handler(CallbackQueryHandler(gender_selection, pattern="^(male|female)$"))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_user_input))
     application.run_polling(allowed_updates=Update.ALL_TYPES)

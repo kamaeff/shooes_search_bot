@@ -59,7 +59,7 @@ def basket_shop(brand, gender):
       new_url =f"{brand}/{gender}/lifestyle;oncourt/"
       print(f"url: {url}\nnew_url: {url + new_url}")
 
-      response = requests.get(url + f"{brand}/{gender}/lifestyle;oncourt/")
+      response = requests.get(url + new_url)
       if(response.status_code == 200):
         soup = BeautifulSoup(response.text, "lxml")
 
@@ -100,6 +100,8 @@ def parsing(info, gender):
         price = price.replace('\n', '')
             
         item_info.append([[name], [price]])
+        
+        print(item_info)
 
     return item_info, url+f"{inp}/{gender}/lifestyle;oncourt/"
     
