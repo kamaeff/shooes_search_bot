@@ -111,7 +111,7 @@ async def parsing(userStorage, chat_id):
     else:
         item_info = []
         image_src = []
-        for card_url in check:  
+        for card_url in check:
             response = requests.get(card_url)
 
             soup = BeautifulSoup(response.text, "lxml")

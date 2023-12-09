@@ -4,6 +4,7 @@ import telegram.ext.filters as filters
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, MessageHandler
+from PIL import Image
 
 from src.backend.config import TOKEN
 from src.backend.DB import connection
@@ -62,10 +63,18 @@ async def gender_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     if text_data == "men":
         context.chat_data[chat_id] = {'selected_gender': 'men'}
-        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты выбрали мужской пол.\n\nТеперь давай определимся какую именно пару мы будем с тобой искать\nP.S вот тебе пример (<i>Puma RS-Z 8.5 us</i>)", parse_mode="HTML")
+        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты выбрали мужской пол.\n\nТеперь давай определимся какую именно пару мы будем с тобой искать\nP.S вот тебе пример (<i>Puma RS-Z 8.5 us</i>)",parse_mode="HTML", reply_markup=InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton(text="Назад", callback_data="back")]
+            ]
+        ))
     elif text_data == "women":
         context.chat_data[chat_id] = {'selected_gender': 'women'}
-        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты выбрали женский пол\n\nТеперь давай определимся какую именно пару мы будем с тобой искать\nP.S вот тебе пример (<i>Puma RS-Z 8.5 us</i>)", parse_mode="HTML")
+        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, ты выбрали женский пол\n\nТеперь давай определимся какую именно пару мы будем с тобой искать\nP.S вот тебе пример (<i>Puma RS-Z 8.5 us</i>)",parse_mode="HTML", reply_markup=InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton(text="Назад", callback_data="back")]
+            ]
+        ))
 
 
 async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -73,18 +82,23 @@ async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     username = update.effective_user.first_name
     message_id = update.message.message_id
     userStorage[chat_id] = {'text': update.message.text,
-                            '_list': update.message.text.lower(),
+                            '_list': update.message.text.lower().split(' '),
                             'selected_gender': context.chat_data.get(chat_id, {}).get('selected_gender', 'unknown')}
 
     await context.bot.delete_message(chat_id, message_id)
     await context.bot.send_message(chat_id, f"<i><b>{username}</b></i>, ищу {userStorage[chat_id]['text']}...", parse_mode="HTML")
 
+    userStorage[chat_id]['_list'] = '-'.join(userStorage[chat_id]['_list'])
     userStorage[chat_id]['res'], userStorage[chat_id]['url'] = await parsing(userStorage, chat_id)
 
-    logger.info(userStorage[chat_id]['res'])
+    logger.info(userStorage[chat_id]['_list'])
 
     if userStorage[chat_id]['res'] == False or not userStorage[chat_id]['res']:
-        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, Не удалось найти кроссовки по вашему запросу: {userStorage[chat_id]['text']}", parse_mode="HTML")
+        await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, Не удалось найти кроссовки по вашему запросу: {userStorage[chat_id]['text']}",parse_mode="HTML", reply_markup=InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton(text="Назад", callback_data="back")]
+            ]
+        ))
     else:
         for idx, info in enumerate(userStorage[chat_id]['res']):
             name = info[0][0] if info[0] else "No Name"
@@ -92,7 +106,18 @@ async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
             image_path = f"./src/backend/gen_imgs/{userStorage[chat_id]['_list']}_{idx}_{userStorage[chat_id]['selected_gender']}_basketshop.jpg"
 
-            await context.bot.send_photo(chat_id, photo=open(image_path, "rb"), caption=f"<b>Кроссовки: </b><i>{name}</i>\n\n <b>Цена:</b> <i>{price}</i>", parse_mode="HTML")
+            original_image = Image.open(image_path)
+            width, height = original_image.size
+            
+            if width > 1600 or height > 1600:
+              resized_image = original_image.resize((1600,1600))
+              resized_image_path = f"./src/backend/gen_imgs/resize_imgs/{userStorage[chat_id]['_list']}_{idx}_{userStorage[chat_id]['selected_gender']}_basketshop_resize.jpg"
+              resized_image.save(resized_image_path)
+
+              await context.bot.send_photo(chat_id, photo=open(resized_image_path, "rb"), caption=f"<b>Кроссовки: </b><i>{name}</i>\n\n <b>Цена:</b> <i>{price}</i>", parse_mode="HTML")
+              
+            else:
+              await context.bot.send_photo(chat_id, photo=open(image_path, "rb"), caption=f"<b>Кроссовки: </b><i>{name}</i>\n\n <b>Цена:</b> <i>{price}</i>", parse_mode="HTML")
 
         await context.bot.send_message(chat_id, text=f"<i><b>{username}</b></i>, держи ссылку: {userStorage[chat_id]['url']}", parse_mode="HTML", reply_markup=InlineKeyboardMarkup(
             [
@@ -103,7 +128,7 @@ async def handle_user_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 def main() -> None:
     loop = asyncio.get_event_loop()
-    connection_pool = loop.run_until_complete(connection.create_connection())
+    loop.run_until_complete(connection.create_connection())
     application = Application.builder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(back, pattern="^(back)$"))

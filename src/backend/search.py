@@ -4,7 +4,7 @@ import os
 
 def writer(param):
     print(param)
-    folder = os.path.join("./src", "backend", "gen_imgs", "topbasket.xlsx")
+    folder = os.path.join("./src", "backend", "gen_imgs","new_model", "topbasket.xlsx")
     book = xlsxwriter.Workbook(folder)
     page = book.add_worksheet("товар")
     row = 0

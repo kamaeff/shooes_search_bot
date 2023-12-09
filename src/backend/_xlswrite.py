@@ -7,7 +7,7 @@ import os
 def download(url):
     resp = requests.get(url, stream=True)
     # создаем файл в котором запишем байты изооброжения
-    folder = os.path.join("./src", "backend", "gen_imgs", "topbasket.xlsx")
+    folder = os.path.join("./src", "backend", "gen_imgs","new_model", "topbasket.xlsx")
     r = open(folder + url.split("/")[-1], "wb")
     for value in resp.iter_content(1024 * 1024):
         r.write(value)
@@ -32,7 +32,7 @@ def get_url():
 def array():
     for card_url in get_url():
         response = requests.get(card_url)
-        sleep(2)
+        # sleep(2)
         soup = BeautifulSoup(response.text, "lxml")
         # переход в карточки обуви
         all_cards = soup.find("div", class_="product__col product__col--2")
@@ -47,4 +47,5 @@ def array():
         url_img = img_part.find("img").get("src")
         download(url_img)
         
+        print (name, price, url_img)        
         yield name, price, url_img
